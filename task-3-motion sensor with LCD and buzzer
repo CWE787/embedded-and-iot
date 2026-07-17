@@ -1,0 +1,52 @@
+#include <Wire.h>  
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+#define SDA_PIN 21
+#define SCL_PIN 22
+const int led = 2;       
+const int pirdata = 13;  
+const int buzzer = 25;   
+int pirstate = LOW;  
+int value = 0;       
+void setup() {
+  pinMode(led, OUTPUT);
+  pinMode(pirdata, INPUT);
+  pinMode(buzzer, OUTPUT); 
+  Serial.begin(115200);
+  Wire.begin(SDA_PIN, SCL_PIN);
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.print("System Ready");
+  Serial.println("PIR Motion Sensor with LCD and Buzzer initialized.");
+}
+void loop() {
+  value = digitalRead(pirdata);
+  if (value == HIGH) {
+    digitalWrite(led, HIGH);
+    if (pirstate == LOW) {
+      Serial.println("Motion Detected");
+      tone(buzzer, 1000);  
+      
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Motion Detected!");
+      
+      pirstate = HIGH;
+    }
+  } 
+  else {
+    digitalWrite(led, LOW);
+    
+    if (pirstate == HIGH) {
+      Serial.println("No Motion Detected");
+      noTone(buzzer);
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("No Motion");
+      
+      pirstate = LOW; 
+    }
+  }
+  delay(200);
+}
